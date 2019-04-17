@@ -8,12 +8,41 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"sort"
 )
 
 func init() {
 	image.RegisterFormat("gif", "gif", gif.Decode, gif.DecodeConfig)
 	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 	image.RegisterFormat("jpg", "jpg", jpeg.Decode, jpeg.DecodeConfig)
+}
+
+func totalCount(freqMap map[string]int) int {
+	total := 0
+	for _, v := range freqMap {
+		total = total + v
+	}
+	return total
+}
+
+func printTable(freqMap map[string]int) {
+	type keyValue struct {
+		Key   string
+		Value int
+	}
+
+	var kvSlice []keyValue
+	for k, v := range freqMap {
+		kvSlice = append(kvSlice, keyValue{k, v})
+	}
+
+	sort.Slice(kvSlice, func(i, j int) bool {
+		return kvSlice[i].Value > kvSlice[j].Value
+	})
+
+	for _, kv := range kvSlice {
+		fmt.Println(kv.Key, ": ", kv.Value)
+	}
 }
 
 func main() {
@@ -52,10 +81,6 @@ func main() {
 	}
 
 	fmt.Printf("\nPixel color frequencies:\n")
-	total := 0
-	for c, f := range pixelFrequency {
-		total = total + f
-		fmt.Println(c, ": ", f)
-	}
-	fmt.Printf("\nTotal number tiles: %d\n", total)
+	printTable(pixelFrequency)
+	fmt.Printf("\nTotal number tiles: %d\n", totalCount(pixelFrequency))
 }
